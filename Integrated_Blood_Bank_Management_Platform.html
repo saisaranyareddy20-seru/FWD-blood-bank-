@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LifeFlow Blood Bank – Donor registration and blood info system." />
+  <meta name="keywords" content="blood bank, donate blood, blood donor, blood type" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <title>LifeFlow – Blood Bank Donor Portal</title>
+  <style>
+    /* CO2: CSS Custom Properties — CSS variables for theming and reuse */
+    /* CO2: Theme Management using CSS Custom Properties */
+    :root {
+      --red:#e8253c; --red-dark:#c0162a; --red-glow:rgba(232,37,60,.13);
+      --bg:#0d0809; --card:#1e1012; --border:rgba(232,37,60,.22);
+      --text:#f0e6e8; --muted:#9e7878;
+      --font-h:'Syne',sans-serif; --font-b:'DM Sans',sans-serif;
+      --rad:12px; --tr:0.3s ease;
+    }
+    /* CO2: Theme Management — light theme overrides using [data-theme] attribute selector */
+    [data-theme="light"] { --bg:#fef5f5; --card:#fff; --text:#1e0d0f; --muted:#6b3040; --border:rgba(192,22,42,.15); }
+    /* CO1: CSS foundational spacing — universal box-sizing reset */
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    /* CO1: Typography essentials, Color representations */
+    body { font-family:var(--font-b); background:var(--bg); color:var(--text); line-height:1.7; overflow-x:hidden; transition:background var(--tr),color var(--tr); }
+    /* CO2: CSS Animations — keyframe animation definitions */
+    @keyframes floatUp   { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes pulseRing { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(2.5);opacity:0} }
+    @keyframes beat      { 0%,100%{transform:scale(1)} 30%{transform:scale(1.18)} 60%{transform:scale(1)} }
+    @keyframes slideIn   { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+    /* CO1: Foundational spacing — padding, max-width container */
+    .container { max-width:1100px; margin:0 auto; padding:0 24px; }
+    /* CO2: CSS Flexbox utility classes */
+    .flex       { display:flex; align-items:center; }
+    .gap-1 { gap:8px; } .gap-2 { gap:16px; }
+    /* CO2: CSS Grid — responsive auto-fit grid layouts */
+    .grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
+    .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; }
+    /* CO2: Accessibility Styling Hints — fixed nav with backdrop blur */
+    /* CO1: CSS Core Selectors — element, class selectors for nav */
+    nav { position:fixed; top:0; left:0; right:0; z-index:999; background:rgba(13,8,9,.88); backdrop-filter:blur(18px); border-bottom:1px solid var(--border); padding:14px 0; }
+    .nav-inner { display:flex; justify-content:space-between; align-items:center; }
+    .logo      { font-family:var(--font-h); font-size:1.5rem; font-weight:800; color:var(--red); text-decoration:none; display:flex; align-items:center; gap:10px; }
+    /* CO2: CSS animations applied to logo-drop element */
+    .logo-drop { width:22px; height:28px; background:var(--red); clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%); animation:beat 2s infinite; }
+    .nav-links   { display:flex; gap:28px; list-style:none; }
+    /* CO1: Links — anchor tag styling */
+    /* CO2: Styling for Interactivity — :hover pseudo-class */
+    .nav-links a { color:var(--muted); text-decoration:none; font-size:.9rem; transition:color var(--tr); }
+    .nav-links a:hover { color:var(--red); }
+    /* CO2: Styling for interactivity — button states and transitions */
+    /* CO2: CSS Transitions — all button hover effects */
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:12px 28px; border-radius:var(--rad); font-family:var(--font-b); font-size:.9rem; font-weight:500; cursor:pointer; border:none; text-decoration:none; transition:all var(--tr); }
+    .btn-primary { background:linear-gradient(135deg,var(--red-dark),var(--red)); color:#fff; box-shadow:0 4px 20px rgba(192,22,42,.35); }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(232,37,60,.5); }
+    .btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+    .btn-outline:hover { border-color:var(--red); color:var(--red); }
+    .btn-sm { padding:7px 16px; font-size:.8rem; }
+    .btn-danger { background:rgba(232,37,60,.15); color:var(--red); border:1px solid rgba(232,37,60,.3); }
+    .btn-danger:hover { background:var(--red); color:#fff; }
+    #themeBtn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:8px 14px; border-radius:50px; cursor:pointer; font-size:.85rem; transition:all var(--tr); }
+    #themeBtn:hover { background:var(--red-dark); color:#fff; }
+    /* CO1: Typography essentials — letter-spacing, text-transform, font-weight */
+    .section-tag   { font-size:.75rem; letter-spacing:3px; text-transform:uppercase; color:var(--red); font-weight:600; margin-bottom:10px; }
+    .section-title { font-family:var(--font-h); font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:800; letter-spacing:-1px; margin-bottom:14px; }
+    .section-sub   { color:var(--muted); font-size:1rem; max-width:500px; }
+    /* CO2: Block Layout — section and card block-level styling */
+    /* CO2: CSS Flexbox — hero uses flex for vertical centering */
+    .hero { min-height:100vh; display:flex; align-items:center; padding:120px 0 80px; position:relative; overflow:hidden; }
+    /* CO2: CSS Functions — radial-gradient() CSS function */
+    .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 65% 60% at 80% 40%,rgba(232,37,60,.12) 0%,transparent 70%); pointer-events:none; }
+    .hero-content { position:relative; z-index:2; max-width:640px; }
+    .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(232,37,60,.1); border:1px solid var(--border); color:var(--red); padding:5px 16px; border-radius:50px; font-size:.78rem; font-weight:500; letter-spacing:1px; text-transform:uppercase; margin-bottom:22px; animation:floatUp .6s ease both; }
+    /* CO2: CSS animations applied inline */
+    .pulse       { width:8px; height:8px; border-radius:50%; background:var(--red); position:relative; }
+    .pulse::after { content:''; position:absolute; inset:-3px; border-radius:50%; border:2px solid var(--red); animation:pulseRing 1.5s ease-out infinite; }
+    .hero h1 { font-family:var(--font-h); font-size:clamp(2.8rem,6vw,5rem); font-weight:800; line-height:1.0; letter-spacing:-2px; margin-bottom:20px; animation:floatUp .7s .1s ease both; }
+    /* CO2: Advanced Selectors — descendant selector h1 span */
+    .hero h1 span { background:linear-gradient(135deg,var(--red),#ff4d65); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero p  { font-size:1.05rem; color:var(--muted); margin-bottom:36px; font-weight:300; animation:floatUp .7s .2s ease both; }
+    .btn-group { display:flex; gap:14px; flex-wrap:wrap; animation:floatUp .7s .3s ease both; }
+    /* CO2: Block Layout — section padding */
+    /* CO1: Foundational spacing — padding and margin in card */
+    section  { padding:72px 0; }
+    .card    { background:var(--card); border:1px solid var(--border); border-radius:var(--rad); padding:28px; transition:transform var(--tr),border-color var(--tr); }
+    .card:hover { transform:translateY(-5px); border-color:var(--red); }
+    .card-icon { width:46px; height:46px; background:var(--red-glow); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:14px; }
+    .card h3 { font-family:var(--font-h); font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+    .card p  { color:var(--muted); font-size:.9rem; }
+    /* CO2: Tables styling */
+    .table-wrap { overflow-x:auto; border-radius:var(--rad); border:1px solid var(--border); }
+    table   { width:100%; border-collapse:collapse; }
+    th      { background:var(--red-dark); color:#fff; font-family:var(--font-h); font-size:.85rem; padding:14px 18px; text-align:left; }
+    td      { padding:12px 18px; border-bottom:1px solid var(--border); font-size:.9rem; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:var(--red-glow); }
+    .badge       { display:inline-block; padding:3px 10px; border-radius:50px; font-size:.75rem; font-weight:600; }
+    .badge-green { background:rgba(46,204,113,.15); color:#2ecc71; }
+    .badge-red   { background:rgba(232,37,60,.15); color:var(--red); }
+    .badge-blue  { background:rgba(52,152,219,.15); color:#3498db; }
+    /* CO2: Forms & Input Handling — form container and fieldset styling */
+    .form-wrap { background:var(--card); border:1px solid var(--border); border-radius:var(--rad); padding:36px; }
+    fieldset    { border:1px solid var(--border); border-radius:var(--rad); padding:20px; margin-bottom:20px; }
+    /* CO2: Semantic Tags — <legend> styled for fieldset labeling */
+    legend      { font-family:var(--font-h); font-size:1rem; font-weight:700; color:var(--red); padding:0 10px; }
+    /* CO2: CSS Grid — form uses grid for responsive multi-column layout */
+    .form-grid  { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; }
+    .fg         { display:flex; flex-direction:column; gap:6px; }
+    /* CO2: Accessibility Styling — visible <label> for each input */
+    label       { font-size:.85rem; font-weight:500; color:var(--muted); }
+    /* CO2: Forms — input, select, textarea styling */
+    /* CO2: Advanced Input Attributes — :focus, :invalid, :valid pseudo-class selectors */
+    input,select,textarea { background:var(--bg); border:1px solid var(--border); border-radius:var(--rad); color:var(--text); font-family:var(--font-b); font-size:.9rem; padding:11px 14px; width:100%; transition:border-color var(--tr),box-shadow var(--tr); }
+    input:focus,select:focus,textarea:focus { outline:none; border-color:var(--red); box-shadow:0 0 0 3px rgba(232,37,60,.15); }
+    /* CO2: Forms Validation — CSS visual feedback for invalid/valid states */
+    input:invalid:not(:placeholder-shown) { border-color:#e67e22; }
+    input:valid:not(:placeholder-shown)   { border-color:#2ecc71; }
+    textarea { resize:vertical; min-height:88px; }
+    .hint    { font-size:.78rem; color:var(--muted); }
+    /* CO2: Media Tags — <figure>, <audio>, <video> container styling */
+    .media-box   { background:var(--card); border:1px solid var(--border); border-radius:var(--rad); overflow:hidden; }
+    .media-thumb { width:100%; height:160px; background:linear-gradient(135deg,var(--red-dark),#2a0a10); display:flex; align-items:center; justify-content:center; font-size:3rem; }
+    .media-info  { padding:16px; }
+    .media-info h4 { font-family:var(--font-h); font-size:1rem; margin-bottom:4px; }
+    .media-info p  { font-size:.82rem; color:var(--muted); }
+    /* ===== DONOR HISTORY STYLES ===== */
+    #history { background: linear-gradient(180deg, transparent 0%, rgba(232,37,60,.03) 50%, transparent 100%); }
+    .history-header { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; margin-bottom:32px; }
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:32px; }
+    .stat-card { background:var(--card); border:1px solid var(--border); border-radius:var(--rad); padding:20px 24px; text-align:center; position:relative; overflow:hidden; }
+    .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--red-dark),var(--red)); }
+    .stat-num  { font-family:var(--font-h); font-size:2.2rem; font-weight:800; color:var(--red); line-height:1; }
+    .stat-label{ font-size:.8rem; color:var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
+    .history-controls { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; align-items:center; }
+    .search-box { position:relative; flex:1; min-width:200px; }
+    .search-box input { padding-left:38px; }
+    .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:.9rem; pointer-events:none; }
+    .filter-select { width:auto; min-width:140px; }
+    /* Donor Cards Grid */
+    .donor-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px; }
+    .donor-card { background:var(--card); border:1px solid var(--border); border-radius:var(--rad); overflow:hidden; transition:all var(--tr); animation:slideIn .4s ease both; }
+    .donor-card:hover { border-color:var(--red); box-shadow:0 8px 30px rgba(232,37,60,.15); transform:translateY(-3px); }
+    .donor-card-top { background:linear-gradient(135deg, rgba(232,37,60,.12), rgba(192,22,42,.06)); padding:18px 20px; display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--border); }
+    .donor-avatar { width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,var(--red-dark),var(--red)); display:flex; align-items:center; justify-content:center; font-family:var(--font-h); font-weight:800; font-size:1.1rem; color:#fff; flex-shrink:0; }
+    .donor-name-block { flex:1; min-width:0; }
+    .donor-name  { font-family:var(--font-h); font-size:1rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .donor-id    { font-size:.72rem; color:var(--muted); font-family:monospace; }
+    .blood-badge { background:linear-gradient(135deg,var(--red-dark),var(--red)); color:#fff; font-family:var(--font-h); font-weight:800; font-size:.85rem; padding:4px 12px; border-radius:50px; flex-shrink:0; }
+    .donor-card-body { padding:16px 20px; }
+    .donor-detail-row { display:flex; align-items:center; gap:8px; font-size:.83rem; color:var(--muted); margin-bottom:8px; }
+    .donor-detail-row:last-child { margin-bottom:0; }
+    .detail-icon { font-size:.9rem; width:18px; text-align:center; flex-shrink:0; }
+    .detail-val  { color:var(--text); }
+    .donor-card-footer { padding:12px 20px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .timestamp { font-size:.72rem; color:var(--muted); }
+    /* Empty State */
+    .empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+    .empty-state .empty-icon { font-size:4rem; margin-bottom:16px; opacity:.4; }
+    .empty-state h3 { font-family:var(--font-h); font-size:1.3rem; color:var(--text); margin-bottom:8px; opacity:.7; }
+    .empty-state p  { font-size:.9rem; max-width:320px; margin:0 auto 20px; }
+    /* Modal for donor detail */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(6px); z-index:2000; display:none; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:32px; max-width:500px; width:100%; max-height:90vh; overflow-y:auto; animation:floatUp .35s ease; position:relative; }
+    .modal-close { position:absolute; top:16px; right:16px; background:rgba(232,37,60,.1); border:1px solid var(--border); color:var(--text); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:all var(--tr); }
+    .modal-close:hover { background:var(--red); color:#fff; }
+    .modal-title { font-family:var(--font-h); font-size:1.4rem; font-weight:800; margin-bottom:20px; padding-right:40px; }
+    .modal-section { margin-bottom:18px; }
+    .modal-section-label { font-size:.72rem; text-transform:uppercase; letter-spacing:2px; color:var(--red); font-weight:600; margin-bottom:8px; }
+    .modal-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:.88rem; }
+    .modal-row:last-child { border-bottom:none; }
+    .modal-key { color:var(--muted); }
+    .modal-val { color:var(--text); font-weight:500; text-align:right; max-width:60%; word-break:break-word; }
+    /* CO2: Media Queries — responsive breakpoints for mobile layout */
+    @media (max-width:768px) {
+      .nav-links { display:none; }
+      .hero h1   { font-size:2.6rem; }
+      .form-grid { grid-template-columns:1fr; }
+      .grid-3,.grid-2 { grid-template-columns:1fr; }
+      .history-header { flex-direction:column; align-items:flex-start; }
+      .donor-grid { grid-template-columns:1fr; }
+    }
+    /* CO2: Responsive Layouts without Frameworks — additional small screen breakpoint */
+    @media (max-width:480px) {
+      .btn-group { flex-direction:column; }
+      .hero      { padding:100px 0 60px; }
+    }
+    .mb-2 { margin-bottom:24px; } .mb-3 { margin-bottom:40px; }
+    #toast  { position:fixed; bottom:28px; right:28px; background:var(--red); color:#fff; padding:14px 22px; border-radius:var(--rad); font-size:.9rem; font-weight:500; display:none; z-index:9999; animation:floatUp .4s ease; }
+    footer  { background:var(--card); border-top:1px solid var(--border); padding:36px 0; text-align:center; color:var(--muted); font-size:.85rem; }
+    footer strong { color:var(--red); }
+    /* ===== REQUESTER STYLES ===== */
+    .requester-card { background:var(--card); border:1px solid var(--border); border-radius:var(--rad); overflow:hidden; transition:all var(--tr); animation:slideIn .4s ease both; }
+    .requester-card:hover { border-color:#e67e22; box-shadow:0 8px 30px rgba(230,126,34,.15); transform:translateY(-3px); }
+    .requester-card-top { background:linear-gradient(135deg,rgba(230,126,34,.1),rgba(192,22,42,.05)); padding:18px 20px; display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--border); }
+    .requester-avatar { width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#c0561a,#e67e22); display:flex; align-items:center; justify-content:center; font-family:var(--font-h); font-weight:800; font-size:1.1rem; color:#fff; flex-shrink:0; }
+    .btn-request { background:linear-gradient(135deg,#c0561a,#e67e22) !important; color:#fff !important; box-shadow:0 4px 20px rgba(192,86,26,.35) !important; border:none !important; }
+    .btn-request:hover { transform:translateY(-2px) !important; box-shadow:0 8px 28px rgba(230,126,34,.5) !important; }
+    .urgency-critical { background:rgba(232,37,60,.18); color:var(--red); padding:3px 10px; border-radius:50px; font-size:.75rem; font-weight:600; border:1px solid rgba(232,37,60,.4); }
+    .urgency-high { background:rgba(230,126,34,.18); color:#e67e22; padding:3px 10px; border-radius:50px; font-size:.75rem; font-weight:600; border:1px solid rgba(230,126,34,.4); }
+    .urgency-normal { background:rgba(52,152,219,.18); color:#3498db; padding:3px 10px; border-radius:50px; font-size:.75rem; font-weight:600; border:1px solid rgba(52,152,219,.4); }
+    .history-tab-bar { display:flex; border-bottom:1px solid var(--border); margin-bottom:24px; }
+    .history-tab-btn { flex:1; padding:10px 16px; background:transparent; border:none; color:var(--muted); font-family:var(--font-b); font-size:.9rem; font-weight:500; cursor:pointer; transition:all var(--tr); border-bottom:3px solid transparent; }
+    .history-tab-btn.active { color:var(--red); border-bottom:3px solid var(--red); }
+    .history-tab-btn.active-orange { color:#e67e22; border-bottom:3px solid #e67e22; }
+    .history-tab-btn:not(.active):not(.active-orange):hover { color:var(--text); }
+    .h-tab-panel { display:none; }
+    .h-tab-panel.active { display:block; }
+    .orange-tag { color:#e67e22; font-size:.75rem; letter-spacing:3px; text-transform:uppercase; font-weight:600; margin-bottom:10px; }
+  </style>
+</head>
+<body>
+  <nav aria-label="Main Navigation">
+    <div class="container nav-inner">
+      <a href="#" class="logo" aria-label="LifeFlow Home">
+        <div class="logo-drop" aria-hidden="true"></div>LifeFlow
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#about">About</a></li>
+        <li><a href="#blood-types">Blood Types</a></li>
+        <li><a href="#register">Donate Blood</a></li>
+        <li><a href="#request">Need Blood</a></li>
+        <li><a href="#history">History</a></li>
+        <li><a href="#media">Learn</a></li>
+      </ul>
+      <div class="flex gap-1">
+        <button id="themeBtn" aria-label="Toggle light/dark theme">🌓 Theme</button>
+        <a href="#request" class="btn btn-sm" style="background:linear-gradient(135deg,#c0561a,#e67e22);color:#fff;border:none;">🆘 Need Blood</a>
+        <a href="#register" class="btn btn-primary btn-sm">🩸 Donate</a>
+      </div>
+    </div>
+  </nav>
+  <main>
+    <section class="hero" id="home" aria-label="Hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-badge"><div class="pulse"></div> Live Donation Drive</div>
+          <h1>Give Blood,<br /><span>Save Lives</span></h1>
+          <p>Every drop counts. Register as a donor today and become a lifeline for someone in need.</p>
+          <div class="btn-group">
+            <a href="#register" class="btn btn-primary">🩸 Register as Donor</a>
+            <a href="#request" class="btn btn-outline">🆘 Request Blood</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="about" aria-label="About">
+      <div class="container">
+        <p class="section-tag">Why Donate?</p>
+        <h2 class="section-title">Every Donation Matters</h2>
+        <p class="section-sub mb-3">One donation can save up to 3 lives. Learn why blood donation is the most powerful gift you can give.</p>
+        <div class="grid-3">
+          <article class="card"><div class="card-icon">❤️</div><h3>Saves Lives</h3><p>Blood is needed for surgeries, cancer treatment, and traumatic injuries every day.</p></article>
+          <article class="card"><div class="card-icon">🔬</div><h3>Health Check</h3><p>Each donation includes a free screening — blood pressure, hemoglobin, and pulse.</p></article>
+          <article class="card"><div class="card-icon">🌍</div><h3>Community Impact</h3><p>Your local donation stays local — helping neighbors and families in emergencies.</p></article>
+          <article class="card"><div class="card-icon">⏱️</div><h3>Only 15 Minutes</h3><p>The donation process is quick, safe, and supervised by certified professionals.</p></article>
+          <article class="card"><div class="card-icon">🔄</div><h3>Body Replenishes</h3><p>Blood is replaced within 24–48 hours. You can safely donate every 56 days.</p></article>
+          <article class="card"><div class="card-icon">🏆</div><h3>Donor Rewards</h3><p>Registered donors receive priority access, health reports, and recognition awards.</p></article>
+        </div>
+      </div>
+    </section>
+    <section id="blood-types" aria-label="Blood Types">
+      <div class="container">
+        <p class="section-tag">Compatibility Guide</p>
+        <h2 class="section-title">Blood Type Chart</h2>
+        <p class="section-sub mb-3">Which blood types can donate to and receive from whom.</p>
+        <div class="table-wrap">
+          <table role="table" aria-label="Blood type compatibility">
+            <thead>
+              <tr>
+                <th scope="col">Type</th>
+                <th scope="col">Donate To</th>
+                <th scope="col">Receive From</th>
+                <th scope="col">Population</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>A+</strong></td><td>A+, AB+</td><td>A+, A−, O+, O−</td><td>35.7%</td><td><span class="badge badge-green">Available</span></td></tr>
+              <tr><td><strong>A−</strong></td><td>A+, A−, AB+, AB−</td><td>A−, O−</td><td>6.3%</td><td><span class="badge badge-red">Needed</span></td></tr>
+              <tr><td><strong>B+</strong></td><td>B+, AB+</td><td>B+, B−, O+, O−</td><td>8.5%</td><td><span class="badge badge-green">Available</span></td></tr>
+              <tr><td><strong>B−</strong></td><td>B+, B−, AB+, AB−</td><td>B−, O−</td><td>1.5%</td><td><span class="badge badge-red">Critical</span></td></tr>
+              <tr><td><strong>O+</strong></td><td>A+, B+, O+, AB+</td><td>O+, O−</td><td>37.4%</td><td><span class="badge badge-green">Available</span></td></tr>
+              <tr><td><strong>O−</strong></td><td>All Types</td><td>O− Only</td><td>6.6%</td><td><span class="badge badge-red">Critical</span></td></tr>
+              <tr><td><strong>AB+</strong></td><td>AB+ Only</td><td>All Types</td><td>3.4%</td><td><span class="badge badge-green">Available</span></td></tr>
+              <tr><td><strong>AB−</strong></td><td>AB+, AB−</td><td>A−, B−, O−, AB−</td><td>0.6%</td><td><span class="badge badge-red">Rare</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section id="register" aria-label="Donor Registration">
+      <div class="container">
+        <p class="section-tag">Join Us</p>
+        <h2 class="section-title">Register as a Donor</h2>
+        <p class="section-sub mb-3">All fields marked * are required. JavaScript validates this form.</p>
+        <div class="form-wrap">
+          <form id="donorForm" novalidate aria-label="Donor Registration Form">
+            <fieldset>
+              <legend>Personal Information</legend>
+              <div class="form-grid">
+                <div class="fg">
+                  <label for="fname">First Name *</label>
+                  <input type="text" id="fname" name="fname" placeholder="e.g. Aisha" required minlength="2" autocomplete="given-name" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="lname">Last Name *</label>
+                  <input type="text" id="lname" name="lname" placeholder="e.g. Sharma" required minlength="2" autocomplete="family-name" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="email">Email Address *</label>
+                  <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email" aria-required="true" aria-describedby="emailHint" />
+                  <span class="hint" id="emailHint">Your donor ID will be sent here.</span>
+                </div>
+                <div class="fg">
+                  <label for="phone">Phone Number *</label>
+                  <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210" required pattern="[0-9+\s]{10,15}" autocomplete="tel" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="dob">Date of Birth *</label>
+                  <input type="date" id="dob" name="dob" required max="2006-01-01" min="1940-01-01" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="weight">Weight (kg) *</label>
+                  <input type="number" id="weight" name="weight" placeholder="e.g. 65" required min="50" max="200" aria-required="true" aria-describedby="weightHint" />
+                  <span class="hint" id="weightHint">Minimum 50 kg required to donate.</span>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Donation Details</legend>
+              <div class="form-grid">
+                <div class="fg">
+                  <label for="bloodType">Blood Type *</label>
+                  <select id="bloodType" name="bloodType" required aria-required="true">
+                    <option value="">-- Select Blood Type --</option>
+                    <option>A+</option><option>A−</option>
+                    <option>B+</option><option>B−</option>
+                    <option>O+</option><option>O−</option>
+                    <option>AB+</option><option>AB−</option>
+                  </select>
+                </div>
+                <div class="fg">
+                  <label>Gender *</label>
+                  <div class="flex gap-2" style="margin-top:8px;flex-wrap:wrap;">
+                    <label><input type="radio" name="gender" value="Male" required /> Male</label>
+                    <label><input type="radio" name="gender" value="Female" /> Female</label>
+                    <label><input type="radio" name="gender" value="Other" /> Other</label>
+                  </div>
+                </div>
+                <div class="fg">
+                  <label>Availability</label>
+                  <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
+                    <label><input type="checkbox" name="avail" value="weekdays" /> Weekdays</label>
+                    <label><input type="checkbox" name="avail" value="weekends" /> Weekends</label>
+                    <label><input type="checkbox" name="avail" value="emergency" /> Emergency Call</label>
+                  </div>
+                </div>
+                <div class="fg">
+                  <label for="city">City *</label>
+                  <input type="text" id="city" name="city" placeholder="e.g. Mumbai" required autocomplete="address-level2" />
+                </div>
+                <div class="fg" style="grid-column:1/-1">
+                  <label for="notes">Health Notes (optional)</label>
+                  <textarea id="notes" name="notes" placeholder="Previous donations, allergies, or conditions..." maxlength="300"></textarea>
+                </div>
+              </div>
+            </fieldset>
+            <div class="fg" style="margin-bottom:18px;">
+              <label style="display:flex;gap:10px;align-items:flex-start;">
+                <input type="checkbox" id="consent" name="consent" required aria-required="true" style="width:auto;margin-top:4px;" />
+                I confirm this information is accurate and consent to be contacted for donation drives.
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:1rem;">🩸 Submit Registration</button>
+            <div id="formMsg" role="alert" aria-live="polite" style="margin-top:14px;font-size:.9rem;display:none;padding:12px;border-radius:8px;"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+    <section id="request" aria-label="Blood Request Registration" style="background:linear-gradient(180deg,transparent 0%,rgba(230,126,34,.04) 50%,transparent 100%);">
+      <div class="container">
+        <p class="orange-tag">Need Blood?</p>
+        <h2 class="section-title">Request Blood</h2>
+        <p class="section-sub mb-3">Fill in your details below. Our team and registered donors will be alerted to your request.</p>
+        <div class="form-wrap" style="border-color:rgba(230,126,34,.3);">
+          <form id="requesterForm" novalidate aria-label="Blood Request Form">
+            <fieldset style="border-color:rgba(230,126,34,.25);">
+              <legend style="color:#e67e22;">Patient / Contact Information</legend>
+              <div class="form-grid">
+                <div class="fg">
+                  <label for="rFname">First Name *</label>
+                  <input type="text" id="rFname" name="rFname" placeholder="e.g. Rahul" required minlength="2" autocomplete="given-name" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="rLname">Last Name *</label>
+                  <input type="text" id="rLname" name="rLname" placeholder="e.g. Verma" required minlength="2" autocomplete="family-name" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="rEmail">Email Address *</label>
+                  <input type="email" id="rEmail" name="rEmail" placeholder="you@example.com" required autocomplete="email" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="rPhone">Phone Number *</label>
+                  <input type="tel" id="rPhone" name="rPhone" placeholder="+91 98765 43210" required pattern="[0-9+\s]{10,15}" autocomplete="tel" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="rCity">City / Hospital Location *</label>
+                  <input type="text" id="rCity" name="rCity" placeholder="e.g. Hyderabad" required autocomplete="address-level2" aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label for="rHospital">Hospital Name</label>
+                  <input type="text" id="rHospital" name="rHospital" placeholder="e.g. Apollo Hospital" />
+                </div>
+              </div>
+            </fieldset>
+            <fieldset style="border-color:rgba(230,126,34,.25);">
+              <legend style="color:#e67e22;">Blood Requirement Details</legend>
+              <div class="form-grid">
+                <div class="fg">
+                  <label for="rBloodType">Blood Type Required *</label>
+                  <select id="rBloodType" name="rBloodType" required aria-required="true">
+                    <option value="">-- Select Blood Type --</option>
+                    <option>A+</option><option>A−</option>
+                    <option>B+</option><option>B−</option>
+                    <option>O+</option><option>O−</option>
+                    <option>AB+</option><option>AB−</option>
+                  </select>
+                </div>
+                <div class="fg">
+                  <label for="rUnits">Units Required *</label>
+                  <input type="number" id="rUnits" name="rUnits" placeholder="e.g. 2" required min="1" max="20" aria-required="true" aria-describedby="unitsHint" />
+                  <span class="hint" id="unitsHint">1 unit = approx. 450 ml.</span>
+                </div>
+                <div class="fg">
+                  <label for="rUrgency">Urgency Level *</label>
+                  <select id="rUrgency" name="rUrgency" required aria-required="true">
+                    <option value="">-- Select Urgency --</option>
+                    <option value="critical">🔴 Critical (within hours)</option>
+                    <option value="high">🟠 High (within 24 hrs)</option>
+                    <option value="normal">🔵 Normal (within a few days)</option>
+                  </select>
+                </div>
+                <div class="fg">
+                  <label for="rNeededBy">Blood Needed By *</label>
+                  <input type="date" id="rNeededBy" name="rNeededBy" required aria-required="true" />
+                </div>
+                <div class="fg">
+                  <label>Patient Gender</label>
+                  <div class="flex gap-2" style="margin-top:8px;flex-wrap:wrap;">
+                    <label><input type="radio" name="rGender" value="Male" /> Male</label>
+                    <label><input type="radio" name="rGender" value="Female" /> Female</label>
+                    <label><input type="radio" name="rGender" value="Other" /> Other</label>
+                  </div>
+                </div>
+                <div class="fg">
+                  <label for="rRelation">Your Relation to Patient *</label>
+                  <select id="rRelation" name="rRelation" required aria-required="true">
+                    <option value="">-- Select --</option>
+                    <option>Self</option>
+                    <option>Parent</option>
+                    <option>Sibling</option>
+                    <option>Spouse</option>
+                    <option>Child</option>
+                    <option>Friend</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="fg" style="grid-column:1/-1">
+                  <label for="rNotes">Additional Notes</label>
+                  <textarea id="rNotes" name="rNotes" placeholder="Describe the medical condition, surgery type, or any other relevant details..." maxlength="400"></textarea>
+                </div>
+              </div>
+            </fieldset>
+            <div class="fg" style="margin-bottom:18px;">
+              <label style="display:flex;gap:10px;align-items:flex-start;">
+                <input type="checkbox" id="rConsent" name="rConsent" required aria-required="true" style="width:auto;margin-top:4px;" />
+                I confirm this information is accurate and consent to being contacted by matched donors and LifeFlow staff.
+              </label>
+            </div>
+            <button type="submit" class="btn btn-request" style="width:100%;justify-content:center;font-size:1rem;">🆘 Submit Blood Request</button>
+            <div id="requesterFormMsg" role="alert" aria-live="polite" style="margin-top:14px;font-size:.9rem;display:none;padding:12px;border-radius:8px;"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+    <section id="history" aria-label="Donor Registration History">
+      <div class="container">
+        <div class="history-header">
+          <div>
+            <p class="section-tag">Records</p>
+            <h2 class="section-title" style="margin-bottom:4px;">Donor History</h2>
+            <p class="section-sub">All registered donors and blood requests from this and previous sessions.</p>
+          </div>
+          <div class="flex gap-1" style="flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" id="exportBtn" aria-label="Export donor list as JSON">📥 Export JSON</button>
+            <button class="btn btn-danger btn-sm" id="clearHistoryBtn" aria-label="Clear all donor history">🗑 Clear All</button>
+          </div>
+        </div>
+        <div class="stats-row" id="statsRow">
+          <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total Donors</div></div>
+          <div class="stat-card"><div class="stat-num" id="statRequests">0</div><div class="stat-label">Blood Requests</div></div>
+          <div class="stat-card"><div class="stat-num" id="statCommon">—</div><div class="stat-label">Most Needed Type</div></div>
+          <div class="stat-card"><div class="stat-num" id="statCities">0</div><div class="stat-label">Cities Covered</div></div>
+        </div>
+        <div class="history-tab-bar">
+          <button class="history-tab-btn active" id="tabDonors" onclick="switchHistoryTab('donors')">🩸 Donors (<span id="tabDonorCount">0</span>)</button>
+          <button class="history-tab-btn" id="tabRequesters" onclick="switchHistoryTab('requesters')">🆘 Blood Requests (<span id="tabRequesterCount">0</span>)</button>
+        </div>
+        <div class="h-tab-panel active" id="panelDonors">
+        <div class="history-controls">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="historySearch" placeholder="Search by name, email, city…" aria-label="Search donors" />
+          </div>
+          <select id="filterBlood" class="filter-select" aria-label="Filter by blood type">
+            <option value="">All Blood Types</option>
+            <option>A+</option><option>A−</option>
+            <option>B+</option><option>B−</option>
+            <option>O+</option><option>O−</option>
+            <option>AB+</option><option>AB−</option>
+          </select>
+          <select id="sortOrder" class="filter-select" aria-label="Sort donors">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </div>
+        <div class="donor-grid" id="donorGrid" aria-live="polite" aria-label="Registered donors">
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <div class="empty-icon">🩸</div>
+          <h3>No Donors Found</h3>
+          <p>No registrations match your search. Register the first donor above!</p>
+          <a href="#register" class="btn btn-primary btn-sm">Register Now</a>
+        </div>
+        </div>
+        <div class="h-tab-panel" id="panelRequesters">
+        <div class="history-controls">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="reqSearch" placeholder="Search by name, city, hospital…" aria-label="Search requesters" />
+          </div>
+          <select id="reqFilterBlood" class="filter-select" aria-label="Filter by blood type">
+            <option value="">All Blood Types</option>
+            <option>A+</option><option>A−</option>
+            <option>B+</option><option>B−</option>
+            <option>O+</option><option>O−</option>
+            <option>AB+</option><option>AB−</option>
+          </select>
+          <select id="reqFilterUrgency" class="filter-select" aria-label="Filter by urgency">
+            <option value="">All Urgency Levels</option>
+            <option value="critical">🔴 Critical</option>
+            <option value="high">🟠 High</option>
+            <option value="normal">🔵 Normal</option>
+          </select>
+          <select id="reqSortOrder" class="filter-select" aria-label="Sort requesters">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="urgency">By Urgency</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </div>
+        <div class="donor-grid" id="requesterGrid" aria-live="polite" aria-label="Blood requests"></div>
+        <div class="empty-state" id="emptyStateReq" style="display:none;">
+          <div class="empty-icon">🆘</div>
+          <h3>No Blood Requests Found</h3>
+          <p>No requests match your search. Submit the first blood request above!</p>
+          <a href="#request" class="btn btn-request btn-sm">Request Blood</a>
+        </div>
+        </div>
+      </div>
+    </section>
+    <div class="modal-overlay" id="donorModal" role="dialog" aria-modal="true" aria-label="Donor Details">
+      <div class="modal">
+        <button class="modal-close" id="modalClose" aria-label="Close modal">✕</button>
+        <h3 class="modal-title" id="modalTitle">Donor Details</h3>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+    <section id="media" aria-label="Educational Media">
+      <div class="container">
+        <p class="section-tag">Learn More</p>
+        <h2 class="section-title mb-2">Educational Resources</h2>
+        <div class="grid-3">
+          <figure class="media-box">
+            <div class="media-thumb" role="img" aria-label="Video: How Blood Donation Works">🎬</div>
+            <figcaption class="media-info">
+              <h4>How Donation Works</h4>
+              <p>A 5-minute guide to the donation process from check-in to recovery.</p>
+              <audio controls aria-label="Audio guide on blood donation" style="width:100%;margin-top:10px;">
+                <source src="#" type="audio/mpeg" />
+                Your browser does not support audio.
+              </audio>
+            </figcaption>
+          </figure>
+          <figure class="media-box">
+            <div class="media-thumb" role="img" aria-label="Infographic: Blood Type Facts">🩸</div>
+            <figcaption class="media-info">
+              <h4>Blood Type Facts</h4>
+              <p>Understand ABO and Rh blood systems, universal donors and recipients.</p>
+              <img src="https://placehold.co/300x70/c0162a/ffffff?text=Blood+Type+Chart" alt="Blood type compatibility chart infographic" style="width:100%;border-radius:8px;margin-top:10px;" />
+            </figcaption>
+          </figure>
+          <figure class="media-box">
+            <div class="media-thumb" role="img" aria-label="Video: Donor Testimonials">💬</div>
+            <figcaption class="media-info">
+              <h4>Donor Testimonials</h4>
+              <p>Real stories from donors whose blood saved lives in their communities.</p>
+              <video controls width="100%" aria-label="Donor testimonial video" style="margin-top:10px;border-radius:8px;background:#000;">
+                <source src="#" type="video/mp4" />
+                Your browser does not support video.
+              </video>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="container">
+      <p>© 2025 <strong>LifeFlow Blood Bank</strong> · Built with HTML, CSS & JavaScript</p>
+      <p style="margin-top:6px;">🌐 Served over HTTPS &nbsp;|&nbsp; Responsive &nbsp;|&nbsp; Accessible</p>
+    </div>
+  </footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>    const STORAGE_KEY = 'lifeflow_donors';
+    const DonorDB = {
+      donors: [],
+      load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          this.donors = raw ? JSON.parse(raw) : [];
+        } catch { this.donors = []; }
+      },
+      save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.donors));
+      },
+      add(donor) {
+        this.donors.unshift(donor); // newest first
+        this.save();
+      },
+      remove(id) {
+        this.donors = this.donors.filter(d => d.id !== id);
+        this.save();
+      },
+      clear() {
+        this.donors = [];
+        this.save();
+      },
+      count: function() { return this.donors.length; }
+    };
+    DonorDB.load();
+    const themeBtn   = document.getElementById('themeBtn');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeBtn.addEventListener('click', () => {
+      const curr = document.documentElement.getAttribute('data-theme');
+      const next = curr === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+    const showToast = (msg) => {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    };
+    document.getElementById('donorForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      try {
+        const fname   = document.getElementById('fname').value.trim();
+        const lname   = document.getElementById('lname').value.trim();
+        const email   = document.getElementById('email').value.trim();
+        const phone   = document.getElementById('phone').value.trim();
+        const dob     = document.getElementById('dob').value;
+        const weight  = parseInt(document.getElementById('weight').value);
+        const blood   = document.getElementById('bloodType').value;
+        const consent = document.getElementById('consent').checked;
+        const city    = document.getElementById('city').value.trim();
+        const notes   = document.getElementById('notes').value.trim();
+        const genderEl = document.querySelector('input[name="gender"]:checked');
+        const gender   = genderEl ? genderEl.value : '';
+        const availBoxes = document.querySelectorAll('input[name="avail"]:checked');
+        const availability = Array.from(availBoxes).map(b => b.value);
+        if (!fname || !lname) throw new Error('Please enter your full name.');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Enter a valid email address.');
+        if (!phone || phone.replace(/\D/g,'').length < 10) throw new Error('Enter a valid phone number.');
+        if (!dob) throw new Error('Please enter your date of birth.');
+        if (isNaN(weight) || weight < 50) throw new Error('You must weigh at least 50 kg to donate.');
+        if (!blood) throw new Error('Please select your blood type.');
+        if (!city) throw new Error('Please enter your city.');
+        if (!consent) throw new Error('You must give consent to proceed.');
+        const birthDate = new Date(dob);
+        const today     = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        const donor = {
+          id:           `LF-${Date.now()}`,
+          name:         `${fname} ${lname}`,
+          firstName:    fname,
+          lastName:     lname,
+          email,
+          phone,
+          dob,
+          age,
+          weight,
+          blood,
+          gender,
+          city,
+          availability,
+          notes,
+          registeredAt: new Date().toISOString()
+        };
+        const fakeAPI = (data) => new Promise((resolve) => {
+          setTimeout(() => resolve({ success: true, id: data.id }), 900);
+        });
+        fakeAPI(donor).then((res) => {
+          DonorDB.add(donor);
+          const msg = document.getElementById('formMsg');
+          msg.style.display    = 'block';
+          msg.style.background = 'rgba(46,204,113,0.1)';
+          msg.style.border     = '1px solid #2ecc71';
+          msg.style.color      = '#2ecc71';
+          msg.textContent      = `✅ Registered! Your Donor ID: ${res.id}`;
+          showToast(`Welcome, ${fname}! You are now registered. ❤️`);
+          document.getElementById('donorForm').reset();
+          renderHistory();
+        });
+      } catch (err) {
+        const msg = document.getElementById('formMsg');
+        msg.style.display    = 'block';
+        msg.style.background = 'rgba(232,37,60,0.1)';
+        msg.style.border     = '1px solid #e67e22';
+        msg.style.color      = '#e67e22';
+        msg.textContent      = `⚠️ ${err.message}`;
+      }
+    });
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    function formatDate(isoStr) {
+      const d = new Date(isoStr);
+      return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) +
+             ' · ' + d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    }
+    function isToday(isoStr) {
+      const d    = new Date(isoStr);
+      const now  = new Date();
+      return d.getDate() === now.getDate() &&
+             d.getMonth() === now.getMonth() &&
+             d.getFullYear() === now.getFullYear();
+    }
+    function renderHistory() {
+      const search    = document.getElementById('historySearch').value.toLowerCase();
+      const bloodFilt = document.getElementById('filterBlood').value;
+      const sortOrd   = document.getElementById('sortOrder').value;
+      let list = [...DonorDB.donors];
+      if (search) {
+        list = list.filter(d =>
+          d.name.toLowerCase().includes(search) ||
+          d.email.toLowerCase().includes(search) ||
+          (d.city && d.city.toLowerCase().includes(search))
+        );
+      }
+      if (bloodFilt) {
+        list = list.filter(d => d.blood === bloodFilt);
+      }
+      if (sortOrd === 'oldest') list.reverse();
+      else if (sortOrd === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+      const allDonors = DonorDB.donors;
+      document.getElementById('statTotal').textContent = allDonors.length;
+      document.getElementById('tabDonorCount') && (document.getElementById('tabDonorCount').textContent = allDonors.length);
+      const allCities = new Set([
+        ...allDonors.map(d => d.city),
+        ...RequesterDB.requesters.map(r => r.city)
+      ].filter(Boolean));
+      document.getElementById('statCities').textContent = allCities.size;
+      if (allDonors.length) {
+        const freq = {};
+        allDonors.forEach(d => { freq[d.blood] = (freq[d.blood] || 0) + 1; });
+        const top = Object.entries(freq).sort((a,b) => b[1]-a[1])[0][0];
+        document.getElementById('statCommon').textContent = top;
+      } else {
+        document.getElementById('statCommon').textContent = '—';
+      }
+      const grid       = document.getElementById('donorGrid');
+      const emptyState = document.getElementById('emptyState');
+      grid.innerHTML   = '';
+      if (!list.length) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+      list.forEach((donor, idx) => {
+        const card = document.createElement('div');
+        card.className = 'donor-card';
+        card.style.animationDelay = `${idx * 0.05}s`;
+        const availStr = donor.availability && donor.availability.length
+          ? donor.availability.join(', ')
+          : 'Not specified';
+        card.innerHTML = `
+          <div class="donor-card-top">
+            <div class="donor-avatar">${getInitials(donor.name)}</div>
+            <div class="donor-name-block">
+              <div class="donor-name">${donor.name}</div>
+              <div class="donor-id">${donor.id}</div>
+            </div>
+            <div class="blood-badge">${donor.blood}</div>
+          </div>
+          <div class="donor-card-body">
+            <div class="donor-detail-row">
+              <span class="detail-icon">📧</span>
+              <span class="detail-val">${donor.email}</span>
+            </div>
+            <div class="donor-detail-row">
+              <span class="detail-icon">📞</span>
+              <span class="detail-val">${donor.phone}</span>
+            </div>
+            <div class="donor-detail-row">
+              <span class="detail-icon">📍</span>
+              <span class="detail-val">${donor.city || '—'}</span>
+            </div>
+            <div class="donor-detail-row">
+              <span class="detail-icon">⚖️</span>
+              <span class="detail-val">${donor.weight} kg &nbsp;·&nbsp; Age ${donor.age || '—'}</span>
+            </div>
+            <div class="donor-detail-row">
+              <span class="detail-icon">🗓</span>
+              <span class="detail-val">${availStr}</span>
+            </div>
+          </div>
+          <div class="donor-card-footer">
+            <span class="timestamp">🕐 ${formatDate(donor.registeredAt)}</span>
+            <div class="flex gap-1">
+              <button class="btn btn-outline btn-sm view-btn" data-id="${donor.id}" aria-label="View details for ${donor.name}">View</button>
+              <button class="btn btn-danger btn-sm delete-btn" data-id="${donor.id}" aria-label="Delete registration for ${donor.name}">✕</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => openModal(btn.dataset.id));
+      });
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const d = DonorDB.donors.find(x => x.id === btn.dataset.id);
+          if (d && confirm(`Remove ${d.name} from the registry?`)) {
+            DonorDB.remove(btn.dataset.id);
+            showToast(`${d.name} has been removed.`);
+            renderHistory();
+          }
+        });
+      });
+    }
+    function openModal(id) {
+      const donor = DonorDB.donors.find(d => d.id === id);
+      if (!donor) return;
+      document.getElementById('modalTitle').textContent = `🩸 ${donor.name}`;
+      const availStr = donor.availability && donor.availability.length
+        ? donor.availability.join(', ')
+        : 'Not specified';
+      document.getElementById('modalBody').innerHTML = `
+        <div class="modal-section">
+          <div class="modal-section-label">Identity</div>
+          <div class="modal-row"><span class="modal-key">Donor ID</span><span class="modal-val" style="font-family:monospace;font-size:.8rem;">${donor.id}</span></div>
+          <div class="modal-row"><span class="modal-key">Full Name</span><span class="modal-val">${donor.name}</span></div>
+          <div class="modal-row"><span class="modal-key">Blood Type</span><span class="modal-val"><span class="badge badge-red">${donor.blood}</span></span></div>
+          <div class="modal-row"><span class="modal-key">Gender</span><span class="modal-val">${donor.gender || '—'}</span></div>
+          <div class="modal-row"><span class="modal-key">Age</span><span class="modal-val">${donor.age || '—'} years</span></div>
+          <div class="modal-row"><span class="modal-key">Date of Birth</span><span class="modal-val">${donor.dob}</span></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">Contact</div>
+          <div class="modal-row"><span class="modal-key">Email</span><span class="modal-val">${donor.email}</span></div>
+          <div class="modal-row"><span class="modal-key">Phone</span><span class="modal-val">${donor.phone}</span></div>
+          <div class="modal-row"><span class="modal-key">City</span><span class="modal-val">${donor.city || '—'}</span></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">Donation Info</div>
+          <div class="modal-row"><span class="modal-key">Weight</span><span class="modal-val">${donor.weight} kg</span></div>
+          <div class="modal-row"><span class="modal-key">Availability</span><span class="modal-val">${availStr}</span></div>
+          <div class="modal-row"><span class="modal-key">Health Notes</span><span class="modal-val">${donor.notes || 'None'}</span></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">Registration</div>
+          <div class="modal-row"><span class="modal-key">Registered At</span><span class="modal-val">${formatDate(donor.registeredAt)}</span></div>
+          <div class="modal-row"><span class="modal-key">Session</span><span class="modal-val"><span class="badge badge-green">Confirmed</span></span></div>
+        </div>
+      `;
+      document.getElementById('donorModal').classList.add('open');
+      document.getElementById('modalClose').focus();
+    }
+    document.getElementById('modalClose').addEventListener('click', () => {
+      document.getElementById('donorModal').classList.remove('open');
+    });
+    document.getElementById('donorModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.getElementById('donorModal').classList.remove('open');
+    });
+    document.getElementById('historySearch').addEventListener('input', renderHistory);
+    document.getElementById('filterBlood').addEventListener('change', renderHistory);
+    document.getElementById('sortOrder').addEventListener('change', renderHistory);
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      if (!DonorDB.donors.length) { showToast('No donors to export.'); return; }
+      const blob = new Blob([JSON.stringify(DonorDB.donors, null, 2)], { type:'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `lifeflow_donors_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Donor list exported! ✅');
+    });
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      if (!DonorDB.donors.length) { showToast('History is already empty.'); return; }
+      if (confirm(`Delete all ${DonorDB.count()} donor records? This cannot be undone.`)) {
+        DonorDB.clear();
+        showToast('All donor records cleared.');
+        renderHistory();
+      }
+    });
+    document.querySelectorAll('.card').forEach(card => {
+      new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) e.target.style.animation = 'floatUp 0.5s ease both';
+        });
+      }, { threshold: 0.15 }).observe(card);
+    });
+    const REQ_STORAGE_KEY = 'lifeflow_requesters';
+    const RequesterDB = {
+      requesters: [],
+      load() {
+        try {
+          const raw = localStorage.getItem(REQ_STORAGE_KEY);
+          this.requesters = raw ? JSON.parse(raw) : [];
+        } catch { this.requesters = []; }
+      },
+      save() {
+        localStorage.setItem(REQ_STORAGE_KEY, JSON.stringify(this.requesters));
+      },
+      add(req) {
+        this.requesters.unshift(req);
+        this.save();
+      },
+      remove(id) {
+        this.requesters = this.requesters.filter(r => r.id !== id);
+        this.save();
+      },
+      clear() {
+        this.requesters = [];
+        this.save();
+      },
+      count() { return this.requesters.length; }
+    };
+    RequesterDB.load();
+    document.getElementById('requesterForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      try {
+        const fname    = document.getElementById('rFname').value.trim();
+        const lname    = document.getElementById('rLname').value.trim();
+        const email    = document.getElementById('rEmail').value.trim();
+        const phone    = document.getElementById('rPhone').value.trim();
+        const city     = document.getElementById('rCity').value.trim();
+        const hospital = document.getElementById('rHospital').value.trim();
+        const blood    = document.getElementById('rBloodType').value;
+        const units    = parseInt(document.getElementById('rUnits').value);
+        const urgency  = document.getElementById('rUrgency').value;
+        const neededBy = document.getElementById('rNeededBy').value;
+        const relation = document.getElementById('rRelation').value;
+        const notes    = document.getElementById('rNotes').value.trim();
+        const consent  = document.getElementById('rConsent').checked;
+        const genderEl = document.querySelector('input[name="rGender"]:checked');
+        const gender   = genderEl ? genderEl.value : '';
+        if (!fname || !lname) throw new Error('Please enter your full name.');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Enter a valid email address.');
+        if (!phone || phone.replace(/\D/g,'').length < 10) throw new Error('Enter a valid phone number.');
+        if (!city) throw new Error('Please enter the city/hospital location.');
+        if (!blood) throw new Error('Please select the required blood type.');
+        if (isNaN(units) || units < 1) throw new Error('Please enter the number of units required.');
+        if (!urgency) throw new Error('Please select urgency level.');
+        if (!neededBy) throw new Error('Please select the date blood is needed by.');
+        if (!relation) throw new Error('Please select your relation to the patient.');
+        if (!consent) throw new Error('You must give consent to proceed.');
+        const requester = {
+          id:          `RQ-${Date.now()}`,
+          name:        `${fname} ${lname}`,
+          firstName:   fname,
+          lastName:    lname,
+          email,
+          phone,
+          city,
+          hospital,
+          blood,
+          units,
+          urgency,
+          neededBy,
+          gender,
+          relation,
+          notes,
+          registeredAt: new Date().toISOString()
+        };
+        const fakeAPI = (data) => new Promise((resolve) => {
+          setTimeout(() => resolve({ success: true, id: data.id }), 900);
+        });
+        fakeAPI(requester).then((res) => {
+          RequesterDB.add(requester);
+          const msg = document.getElementById('requesterFormMsg');
+          msg.style.display    = 'block';
+          msg.style.background = 'rgba(46,204,113,0.1)';
+          msg.style.border     = '1px solid #2ecc71';
+          msg.style.color      = '#2ecc71';
+          msg.textContent      = `✅ Request Submitted! Your Request ID: ${res.id}`;
+          showToast(`Request submitted, ${fname}! We will find a match soon. 🆘`);
+          document.getElementById('requesterForm').reset();
+          renderHistory();
+          renderRequesterHistory();
+        });
+      } catch(err) {
+        const msg = document.getElementById('requesterFormMsg');
+        msg.style.display    = 'block';
+        msg.style.background = 'rgba(232,37,60,0.1)';
+        msg.style.border     = '1px solid #e67e22';
+        msg.style.color      = '#e67e22';
+        msg.textContent      = `⚠️ ${err.message}`;
+      }
+    });
+    function switchHistoryTab(tab) {
+      const donorBtn   = document.getElementById('tabDonors');
+      const reqBtn     = document.getElementById('tabRequesters');
+      const donorPanel = document.getElementById('panelDonors');
+      const reqPanel   = document.getElementById('panelRequesters');
+      if (tab === 'donors') {
+        donorBtn.className   = 'history-tab-btn active';
+        reqBtn.className     = 'history-tab-btn';
+        donorPanel.className = 'h-tab-panel active';
+        reqPanel.className   = 'h-tab-panel';
+      } else {
+        donorBtn.className   = 'history-tab-btn';
+        reqBtn.className     = 'history-tab-btn active-orange';
+        donorPanel.className = 'h-tab-panel';
+        reqPanel.className   = 'h-tab-panel active';
+      }
+    }
+    function urgencyLabel(u) {
+      if (u === 'critical') return '<span class="urgency-critical">🔴 Critical</span>';
+      if (u === 'high')     return '<span class="urgency-high">🟠 High</span>';
+      return '<span class="urgency-normal">🔵 Normal</span>';
+    }
+    function renderRequesterHistory() {
+      const search      = document.getElementById('reqSearch').value.toLowerCase();
+      const bloodFilt   = document.getElementById('reqFilterBlood').value;
+      const urgencyFilt = document.getElementById('reqFilterUrgency').value;
+      const sortOrd     = document.getElementById('reqSortOrder').value;
+      let list = [...RequesterDB.requesters];
+      if (search) {
+        list = list.filter(r =>
+          r.name.toLowerCase().includes(search) ||
+          r.email.toLowerCase().includes(search) ||
+          (r.city && r.city.toLowerCase().includes(search)) ||
+          (r.hospital && r.hospital.toLowerCase().includes(search))
+        );
+      }
+      if (bloodFilt)   list = list.filter(r => r.blood === bloodFilt);
+      if (urgencyFilt) list = list.filter(r => r.urgency === urgencyFilt);
+      if (sortOrd === 'oldest') list.reverse();
+      else if (sortOrd === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+      else if (sortOrd === 'urgency') {
+        const order = { critical:0, high:1, normal:2 };
+        list.sort((a,b) => (order[a.urgency]||2) - (order[b.urgency]||2));
+      }
+      document.getElementById('statRequests').textContent = RequesterDB.requesters.length;
+      document.getElementById('tabRequesterCount').textContent = RequesterDB.requesters.length;
+      document.getElementById('tabDonorCount').textContent = DonorDB.donors.length;
+      const allReqs = RequesterDB.requesters;
+      if (allReqs.length) {
+        const freq = {};
+        allReqs.forEach(r => { freq[r.blood] = (freq[r.blood] || 0) + 1; });
+        const top = Object.entries(freq).sort((a,b) => b[1]-a[1])[0][0];
+        document.getElementById('statCommon').textContent = top;
+      }
+      const grid       = document.getElementById('requesterGrid');
+      const emptyState = document.getElementById('emptyStateReq');
+      grid.innerHTML   = '';
+      if (!list.length) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+      list.forEach((req, idx) => {
+        const card = document.createElement('div');
+        card.className = 'requester-card';
+        card.style.animationDelay = `${idx * 0.05}s`;
+        card.innerHTML = `
+          <div class="requester-card-top">
+            <div class="requester-avatar">${getInitials(req.name)}</div>
+            <div class="donor-name-block">
+              <div class="donor-name">${req.name}</div>
+              <div class="donor-id">${req.id}</div>
+            </div>
+            <div class="blood-badge" style="background:linear-gradient(135deg,#c0561a,#e67e22);">${req.blood}</div>
+          </div>
+          <div class="donor-card-body">
+            <div class="donor-detail-row">
+              <span class="detail-icon">📧</span>
+              <span class="detail-val">${req.email}</span>
+            </div>
+            <div class="donor-detail-row">
+              <span class="detail-icon">📞</span>
+              <span class="detail-val">${req.phone}</span>
+            </div>
+            <div class="donor-detail-row">
+              <span class="detail-icon">📍</span>
+              <span class="detail-val">${req.city}${req.hospital ? ' · ' + req.hospital : ''}</span>
+            </div>
+            <div class="donor-detail-row">
+              <span class="detail-icon">🩸</span>
+              <span class="detail-val">${req.units} unit(s) needed &nbsp;·&nbsp; By ${req.neededBy}</span>
+            </div>
+            <div class="donor-detail-row">
+              <span class="detail-icon">⚠️</span>
+              <span class="detail-val">${urgencyLabel(req.urgency)}</span>
+            </div>
+          </div>
+          <div class="donor-card-footer">
+            <span class="timestamp">🕐 ${formatDate(req.registeredAt)}</span>
+            <div class="flex gap-1">
+              <button class="btn btn-outline btn-sm view-req-btn" data-id="${req.id}" aria-label="View request details for ${req.name}">View</button>
+              <button class="btn btn-danger btn-sm delete-req-btn" data-id="${req.id}" aria-label="Delete request for ${req.name}">✕</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      document.querySelectorAll('.view-req-btn').forEach(btn => {
+        btn.addEventListener('click', () => openRequesterModal(btn.dataset.id));
+      });
+      document.querySelectorAll('.delete-req-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const r = RequesterDB.requesters.find(x => x.id === btn.dataset.id);
+          if (r && confirm(`Remove request by ${r.name}?`)) {
+            RequesterDB.remove(btn.dataset.id);
+            showToast(`Request by ${r.name} removed.`);
+            renderRequesterHistory();
+          }
+        });
+      });
+    }
+    function openRequesterModal(id) {
+      const req = RequesterDB.requesters.find(r => r.id === id);
+      if (!req) return;
+      document.getElementById('modalTitle').textContent = `🆘 ${req.name}`;
+      document.getElementById('modalBody').innerHTML = `
+        <div class="modal-section">
+          <div class="modal-section-label" style="color:#e67e22;">Request Identity</div>
+          <div class="modal-row"><span class="modal-key">Request ID</span><span class="modal-val" style="font-family:monospace;font-size:.8rem;">${req.id}</span></div>
+          <div class="modal-row"><span class="modal-key">Full Name</span><span class="modal-val">${req.name}</span></div>
+          <div class="modal-row"><span class="modal-key">Blood Needed</span><span class="modal-val"><span class="badge badge-red">${req.blood}</span></span></div>
+          <div class="modal-row"><span class="modal-key">Units Required</span><span class="modal-val">${req.units} unit(s)</span></div>
+          <div class="modal-row"><span class="modal-key">Urgency</span><span class="modal-val">${urgencyLabel(req.urgency)}</span></div>
+          <div class="modal-row"><span class="modal-key">Needed By</span><span class="modal-val">${req.neededBy}</span></div>
+          <div class="modal-row"><span class="modal-key">Patient Gender</span><span class="modal-val">${req.gender || '—'}</span></div>
+          <div class="modal-row"><span class="modal-key">Relation to Patient</span><span class="modal-val">${req.relation || '—'}</span></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label" style="color:#e67e22;">Contact</div>
+          <div class="modal-row"><span class="modal-key">Email</span><span class="modal-val">${req.email}</span></div>
+          <div class="modal-row"><span class="modal-key">Phone</span><span class="modal-val">${req.phone}</span></div>
+          <div class="modal-row"><span class="modal-key">City</span><span class="modal-val">${req.city}</span></div>
+          <div class="modal-row"><span class="modal-key">Hospital</span><span class="modal-val">${req.hospital || '—'}</span></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label" style="color:#e67e22;">Notes</div>
+          <div class="modal-row"><span class="modal-key">Medical Notes</span><span class="modal-val">${req.notes || 'None'}</span></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label" style="color:#e67e22;">Submission</div>
+          <div class="modal-row"><span class="modal-key">Submitted At</span><span class="modal-val">${formatDate(req.registeredAt)}</span></div>
+          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val"><span class="badge badge-blue">Pending Match</span></span></div>
+        </div>
+      `;
+      document.getElementById('donorModal').classList.add('open');
+      document.getElementById('modalClose').focus();
+    }
+    document.getElementById('reqSearch').addEventListener('input', renderRequesterHistory);
+    document.getElementById('reqFilterBlood').addEventListener('change', renderRequesterHistory);
+    document.getElementById('reqFilterUrgency').addEventListener('change', renderRequesterHistory);
+    document.getElementById('reqSortOrder').addEventListener('change', renderRequesterHistory);
+    const COLOR_RED  = 0xe8253c;
+    const MAX_DONORS = 1e3;
+    const BloodBankApp = (() => {
+      const init = () => {
+        console.log(`LifeFlow initialised | Max donors: ${MAX_DONORS} | Color: #${COLOR_RED.toString(16)}`);
+        renderHistory();
+        renderRequesterHistory();
+        document.getElementById('tabDonorCount').textContent = DonorDB.donors.length;
+        document.getElementById('tabRequesterCount').textContent = RequesterDB.requesters.length;
+      };
+      return { init };
+    })();
+    // ── Seed Data: 10 Donors ──────────────────────────────────────
+    const seedDonors = [
+      { id:'LF-1001', name:'Arjun Sharma',   firstName:'Arjun',   lastName:'Sharma',   email:'arjun.sharma@gmail.com',   phone:'9876543210', dob:'1996-04-12', age:28, weight:72, blood:'O+',  gender:'Male',   city:'Delhi',     availability:['Weekends'], notes:'Healthy, no medications.', registeredAt:'2025-01-05T09:30:00.000Z' },
+      { id:'LF-1002', name:'Priya Patel',    firstName:'Priya',   lastName:'Patel',    email:'priya.patel@yahoo.com',    phone:'9123456789', dob:'1990-08-22', age:34, weight:58, blood:'A-',  gender:'Female', city:'Mumbai',    availability:['Weekdays'], notes:'Previously donated twice.', registeredAt:'2025-01-10T11:00:00.000Z' },
+      { id:'LF-1003', name:'Ravi Kumar',     firstName:'Ravi',    lastName:'Kumar',    email:'ravi.kumar@outlook.com',   phone:'9988776655', dob:'2002-03-15', age:22, weight:68, blood:'B+',  gender:'Male',   city:'Chennai',   availability:['Weekends','Weekdays'], notes:'Fit and active.', registeredAt:'2025-01-15T08:45:00.000Z' },
+      { id:'LF-1004', name:'Sneha Iyer',     firstName:'Sneha',   lastName:'Iyer',     email:'sneha.iyer@gmail.com',     phone:'9871234567', dob:'1995-11-30', age:29, weight:55, blood:'AB+', gender:'Female', city:'Bengaluru', availability:['Weekends'], notes:'No allergies.', registeredAt:'2025-01-20T14:20:00.000Z' },
+      { id:'LF-1005', name:'Mohammed Ali',   firstName:'Mohammed',lastName:'Ali',      email:'mohammed.ali@gmail.com',   phone:'9765432100', dob:'1984-06-05', age:40, weight:80, blood:'O-',  gender:'Male',   city:'Hyderabad', availability:['Weekdays'], notes:'Universal donor, donated 9 times.', registeredAt:'2025-02-01T10:10:00.000Z' },
+      { id:'LF-1006', name:'Kavita Singh',   firstName:'Kavita',  lastName:'Singh',    email:'kavita.singh@hotmail.com', phone:'9654321098', dob:'1999-02-18', age:25, weight:62, blood:'A+',  gender:'Female', city:'Pune',      availability:['Weekends'], notes:'Vegetarian, good hemoglobin.', registeredAt:'2025-02-05T16:00:00.000Z' },
+      { id:'LF-1007', name:'Deepak Reddy',   firstName:'Deepak',  lastName:'Reddy',    email:'deepak.reddy@gmail.com',   phone:'9543210987', dob:'1993-09-25', age:31, weight:75, blood:'B-',  gender:'Male',   city:'Delhi',     availability:['Weekdays','Weekends'], notes:'Regular donor since 2019.', registeredAt:'2025-02-10T12:30:00.000Z' },
+      { id:'LF-1008', name:'Anita Nair',     firstName:'Anita',   lastName:'Nair',     email:'anita.nair@gmail.com',     phone:'9432109876', dob:'1997-07-08', age:27, weight:60, blood:'O+',  gender:'Female', city:'Kochi',     availability:['Weekends'], notes:'Donated 8 times, no issues.', registeredAt:'2025-02-14T09:00:00.000Z' },
+      { id:'LF-1009', name:'Suresh Menon',   firstName:'Suresh',  lastName:'Menon',    email:'suresh.menon@yahoo.com',   phone:'9321098765', dob:'1979-12-01', age:45, weight:85, blood:'AB-', gender:'Male',   city:'Mumbai',    availability:['Weekdays'], notes:'Rare blood group donor.', registeredAt:'2025-02-20T13:45:00.000Z' },
+      { id:'LF-1010', name:'Lakshmi Devi',   firstName:'Lakshmi', lastName:'Devi',     email:'lakshmi.devi@gmail.com',   phone:'9210987654', dob:'1991-05-17', age:33, weight:65, blood:'O-',  gender:'Female', city:'Chennai',   availability:['Weekends','Weekdays'], notes:'No chronic conditions.', registeredAt:'2025-03-01T07:30:00.000Z' },
+    ];
+    seedDonors.forEach(d => { if (!DonorDB.donors.find(x => x.id === d.id)) DonorDB.donors.push(d); });
+    DonorDB.save();
+
+    // ── Seed Data: 10 Blood Requests ─────────────────────────────
+    const seedRequests = [
+      { id:'RQ-2001', name:'Rahul Verma',      firstName:'Rahul',    lastName:'Verma',      email:'rahul.verma@gmail.com',      phone:'9811122233', city:'Delhi',     hospital:'AIIMS Delhi',         blood:'O+',  units:2, urgency:'critical', neededBy:'2025-03-12', relation:'Brother',  gender:'Male',   notes:'Post-surgery emergency.',      registeredAt:'2025-03-05T08:00:00.000Z' },
+      { id:'RQ-2002', name:'Meena Joshi',       firstName:'Meena',    lastName:'Joshi',      email:'meena.joshi@yahoo.com',      phone:'9922334455', city:'Mumbai',    hospital:'KEM Hospital',        blood:'A-',  units:1, urgency:'high',     neededBy:'2025-03-15', relation:'Mother',   gender:'Female', notes:'Scheduled surgery.',           registeredAt:'2025-03-06T10:30:00.000Z' },
+      { id:'RQ-2003', name:'Kiran Das',         firstName:'Kiran',    lastName:'Das',        email:'kiran.das@outlook.com',      phone:'9733445566', city:'Chennai',   hospital:'Apollo Chennai',      blood:'B+',  units:3, urgency:'critical', neededBy:'2025-03-11', relation:'Father',   gender:'Male',   notes:'Accident victim, urgent.',     registeredAt:'2025-03-06T14:00:00.000Z' },
+      { id:'RQ-2004', name:'Sunita Rao',        firstName:'Sunita',   lastName:'Rao',        email:'sunita.rao@gmail.com',       phone:'9644556677', city:'Pune',      hospital:'Fortis Pune',         blood:'AB+', units:2, urgency:'normal',   neededBy:'2025-03-20', relation:'Self',     gender:'Female', notes:'Elective procedure.',          registeredAt:'2025-03-07T09:15:00.000Z' },
+      { id:'RQ-2005', name:'Amir Khan',         firstName:'Amir',     lastName:'Khan',       email:'amir.khan@gmail.com',        phone:'9555667788', city:'Hyderabad', hospital:'Yashoda Hospital',    blood:'O-',  units:4, urgency:'critical', neededBy:'2025-03-10', relation:'Son',      gender:'Male',   notes:'Thalassemia patient, critical.',registeredAt:'2025-03-07T11:00:00.000Z' },
+      { id:'RQ-2006', name:'Divya Nambiar',     firstName:'Divya',    lastName:'Nambiar',    email:'divya.nambiar@gmail.com',    phone:'9466778899', city:'Kochi',     hospital:'Aster Medcity',      blood:'A+',  units:1, urgency:'high',     neededBy:'2025-03-18', relation:'Sister',   gender:'Female', notes:'Dengue complication.',         registeredAt:'2025-03-07T15:30:00.000Z' },
+      { id:'RQ-2007', name:'Vikram Bose',       firstName:'Vikram',   lastName:'Bose',       email:'vikram.bose@hotmail.com',    phone:'9377889900', city:'Bengaluru', hospital:'Manipal Hospital',    blood:'B-',  units:2, urgency:'high',     neededBy:'2025-03-16', relation:'Spouse',   gender:'Male',   notes:'Needs rare blood type.',       registeredAt:'2025-03-08T08:45:00.000Z' },
+      { id:'RQ-2008', name:'Pooja Tiwari',      firstName:'Pooja',    lastName:'Tiwari',     email:'pooja.tiwari@gmail.com',     phone:'9288990011', city:'Delhi',     hospital:'Safdarjung Hospital', blood:'O+',  units:1, urgency:'normal',   neededBy:'2025-03-22', relation:'Friend',   gender:'Female', notes:'Routine transfusion.',         registeredAt:'2025-03-08T10:00:00.000Z' },
+      { id:'RQ-2009', name:'Harish Pillai',     firstName:'Harish',   lastName:'Pillai',     email:'harish.pillai@yahoo.com',    phone:'9199001122', city:'Mumbai',    hospital:'Lilavati Hospital',   blood:'AB-', units:2, urgency:'critical', neededBy:'2025-03-11', relation:'Father',   gender:'Male',   notes:'Rare group, transplant prep.', registeredAt:'2025-03-08T12:30:00.000Z' },
+      { id:'RQ-2010', name:'Anjali Gupta',      firstName:'Anjali',   lastName:'Gupta',      email:'anjali.gupta@gmail.com',     phone:'9100112233', city:'Chennai',   hospital:'MIOT Hospital',       blood:'A+',  units:3, urgency:'high',     neededBy:'2025-03-17', relation:'Mother',   gender:'Female', notes:'Cancer patient transfusion.',  registeredAt:'2025-03-08T14:00:00.000Z' },
+    ];
+    seedRequests.forEach(r => { if (!RequesterDB.requesters.find(x => x.id === r.id)) RequesterDB.requesters.push(r); });
+    RequesterDB.save();
+
+    BloodBankApp.init();
+  </script>
+</body>
+</html>
